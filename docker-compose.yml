@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: book-app
+    ports:
+      - "8501:8501"  # Streamlit UI
+    volumes:
+      - ./images:/app/images  # Mount your local image directory here (create ./images or adjust path)
+      - ./data:/app/data  # Optional: Persist output JSON if needed
+    depends_on:
+      - ollama
+    environment:
+      - PYTHONUNBUFFERED=1  # For real-time logs
+    restart: unless-stopped
+
+volumes:
+  ollama-data:
