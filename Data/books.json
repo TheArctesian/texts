@@ -1,0 +1,39 @@
+[
+  {
+    "id": "test-book-img-6080",
+    "title": "Anabasis",
+    "author": "Xenophon",
+    "description": "Anabasis is an ancient Greek text by Xenophon, detailing the expedition of a large mercenary army (the Ten Thousand) through Persia.",
+    "original_date": 0,
+    "release_date": null,
+    "original_location_name": "",
+    "original_location_latitude": 0,
+    "original_location_longitude": 0,
+    "original_language": "",
+    "edition_language": "",
+    "image_path": "/app/Data/IMGS/iPhone/Recents/IMG_6080.JPG",
+    "processed_at": "2025-01-01T12:00:00Z",
+    "data_source": "LLM-Enhanced",
+    "llm_analysis": {
+      "author": "Xenophon",
+      "confidence": 0.95,
+      "corrections_made": [
+        "Removed incorrect ISBN",
+        "Removed incorrect year",
+        "Removed incorrect publisher",
+        "Added genre and original language",
+        "Provided a brief description"
+      ],
+      "description": "Anabasis is an ancient Greek text by Xenophon, detailing the expedition of a large mercenary army (the Ten Thousand) through Persia.",
+      "edition": null,
+      "genre": "Classical Literature",
+      "isbn": null,
+      "original_language": "Ancient Greek",
+      "publisher": null,
+      "title": "Anabasis",
+      "year": null
+    },
+    "image_analysis": "",
+    "confidence_score": 0.95
+  }
+]

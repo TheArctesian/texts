@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta name="generator" content="Hugo 0.134.3"><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Collection - Library</title>
+    <link rel="stylesheet" href="/css/style.css">
+    
+</head>
+<body>
+    <header style="display: none;">
+    </header>
+    <main>
+        
+<div class="books-header">
+    <h1>Library Collection</h1>
+    <div class="search-controls">
+        <input type="text" id="search-input" placeholder="Search books..." style="flex: 1; padding: 0.75rem; background: var(--nord1); border: 1px solid var(--nord3); color: var(--nord4); border-radius: 4px; font-family: monospace;">
+        <select id="sort-select" style="padding: 0.75rem; background: var(--nord1); border: 1px solid var(--nord3); color: var(--nord4); border-radius: 4px; font-family: monospace;">
+            <option value="title-asc">Title A-Z</option>
+            <option value="title-desc">Title Z-A</option>
+            <option value="author-asc">Author A-Z</option>
+            <option value="author-desc">Author Z-A</option>
+            <option value="date-asc">Year Old-New</option>
+            <option value="date-desc">Year New-Old</option>
+            <option value="genre-asc">Genre A-Z</option>
+            <option value="language-asc">Language A-Z</option>
+        </select>
+    </div>
+    <div class="stats-bar" id="stats-bar" style="background: var(--nord2); border-radius: 6px; padding: 1rem; margin: 1rem 0; font-family: monospace;">
+        <span style="color: var(--nord8);">Total Books:</span> <span style="color: var(--nord6);" id="book-count">Loading...</span>
+        <span style="color: var(--nord4); margin-left: 2rem;">Showing:</span> <span style="color: var(--nord6);" id="filtered-count">0</span>
+    </div>
+</div>
+<div id="books-container"></div>
+
+    </main>
+    <footer>
+        <p>&copy; 2025 Library Collection</p>
+    </footer>
+    
+<script>
+let allBooks = [];
+let filteredBooks = [];
+
+function updateStats() {
+    document.getElementById('book-count').textContent = allBooks.length;
+    document.getElementById('filtered-count').textContent = filteredBooks.length;
+}
+
+function sortBooks(books, sortBy) {
+    const [field, direction] = sortBy.split('-');
+    
+    return [...books].sort((a, b) => {
+        let aVal, bVal;
+        
+        switch(field) {
+            case 'title':
+                aVal = (a.title || '').toLowerCase();
+                bVal = (b.title || '').toLowerCase();
+                break;
+            case 'author':
+                aVal = (a.author || '').toLowerCase();
+                bVal = (b.author || '').toLowerCase();
+                break;
+            case 'date':
+                aVal = a.original_date || 0;
+                bVal = b.original_date || 0;
+                break;
+            case 'genre':
+                aVal = (a.llm_analysis?.genre || a.genre || '').toLowerCase();
+                bVal = (b.llm_analysis?.genre || b.genre || '').toLowerCase();
+                break;
+            case 'language':
+                aVal = (a.language || '').toLowerCase();
+                bVal = (b.language || '').toLowerCase();
+                break;
+            default:
+                aVal = a.title || '';
+                bVal = b.title || '';
+        }
+        
+        if (direction === 'desc') {
+            return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+        } else {
+            return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+        }
+    });
+}
+
+function filterBooks(books, searchTerm) {
+    if (!searchTerm) return books;
+    
+    const term = searchTerm.toLowerCase();
+    return books.filter(book => {
+        return (book.title || '').toLowerCase().includes(term) ||
+               (book.author || '').toLowerCase().includes(term) ||
+               (book.description || '').toLowerCase().includes(term) ||
+               (book.llm_analysis?.genre || book.genre || '').toLowerCase().includes(term) ||
+               (book.publisher || '').toLowerCase().includes(term) ||
+               String(book.original_date || '').includes(term);
+    });
+}
+
+function renderBooks(books) {
+    const container = document.getElementById('books-container');
+    if (!books || books.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: var(--nord4); padding: 2rem;">No books found</div>';
+        return;
+    }
+    
+    const booksGrid = document.createElement('div');
+    booksGrid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem;';
+    
+    books.forEach(book => {
+        const bookCard = document.createElement('div');
+        bookCard.style.cssText = 'background: var(--nord1); border: 1px solid var(--nord3); border-radius: 8px; padding: 1.5rem; transition: transform 0.2s ease, border-color 0.2s ease; cursor: pointer;';
+        
+        const genre = book.llm_analysis?.genre || book.genre || '';
+        const language = book.language || '';
+        const originalLocation = book.original_location_name || '';
+        
+        bookCard.innerHTML = `
+            <div style="font-weight: 600; color: var(--nord6); margin-bottom: 0.5rem; font-size: 1.1rem;">${book.title || 'Unknown Title'}</div>
+            <div style="color: var(--nord8); margin-bottom: 0.5rem;">by ${book.author || 'Unknown Author'}</div>
+            ${book.original_date ? `<div style="color: var(--nord9); font-size: 0.9rem; margin-bottom: 0.5rem;">${book.original_date}</div>` : ''}
+            ${originalLocation ? `<div style="color: var(--nord7); font-size: 0.8rem; margin-bottom: 0.5rem;">${originalLocation}</div>` : ''}
+            ${book.publisher ? `<div style="color: var(--nord4); font-size: 0.8rem; margin-bottom: 0.5rem;">${book.publisher}</div>` : ''}
+            ${genre ? `<div style="color: var(--nord13); font-size: 0.8rem; margin-bottom: 0.5rem;">${genre}</div>` : ''}
+            ${language ? `<div style="color: var(--nord14); font-size: 0.8rem; margin-bottom: 0.5rem;">Language: ${language}</div>` : ''}
+            ${book.description ? `<div style="color: var(--nord4); font-size: 0.9rem; line-height: 1.4; margin-top: 1rem;">${book.description.substring(0, 200)}${book.description.length > 200 ? '...' : ''}</div>` : ''}
+        `;
+        
+        bookCard.addEventListener('mouseenter', () => {
+            bookCard.style.transform = 'translateY(-2px)';
+            bookCard.style.borderColor = 'var(--nord8)';
+        });
+        
+        bookCard.addEventListener('mouseleave', () => {
+            bookCard.style.transform = 'translateY(0)';
+            bookCard.style.borderColor = 'var(--nord3)';
+        });
+        
+        booksGrid.appendChild(bookCard);
+    });
+    
+    container.innerHTML = '';
+    container.appendChild(booksGrid);
+    updateStats();
+}
+
+function handleSearch() {
+    const searchTerm = document.getElementById('search-input').value;
+    const sortBy = document.getElementById('sort-select').value;
+    
+    filteredBooks = filterBooks(allBooks, searchTerm);
+    const sortedBooks = sortBooks(filteredBooks, sortBy);
+    renderBooks(sortedBooks);
+}
+
+
+fetch('/data/books.json')
+    .then(response => response.json())
+    .then(books => {
+        allBooks = books || [];
+        filteredBooks = allBooks;
+        renderBooks(sortBooks(allBooks, 'title-asc'));
+        
+        
+        document.getElementById('search-input').addEventListener('input', handleSearch);
+        document.getElementById('sort-select').addEventListener('change', handleSearch);
+    })
+    .catch(error => {
+        console.error('Error loading books:', error);
+        document.getElementById('books-container').innerHTML = '<div style="color: var(--nord11); text-align: center; padding: 2rem;">Error loading books</div>';
+    });
+</script>
+
+</body>
+</html>

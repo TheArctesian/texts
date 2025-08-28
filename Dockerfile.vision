@@ -1,0 +1,43 @@
+# Multi-stage build for Book Vision Processor
+FROM golang:1.21-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache git gcc musl-dev
+
+WORKDIR /build
+
+# Copy go mod files
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Build the vision processor
+RUN go build -o book-vision ./cmd/vision-main.go
+
+# Final stage
+FROM alpine:latest
+
+# Install runtime dependencies
+RUN apk add --no-cache \
+    ca-certificates \
+    curl \
+    jq
+
+WORKDIR /app
+
+# Copy binary from builder
+COPY --from=builder /build/book-vision /app/book-vision
+COPY --from=builder /build/config.yaml /app/config.yaml
+
+# Create data directory
+RUN mkdir -p /app/Data/IMGS/iPhone/Recents
+
+# Health check for Ollama connectivity
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:11434/api/tags || exit 1
+
+# Default command
+ENTRYPOINT ["/app/book-vision"]
+CMD ["-config", "/app/config.yaml"]

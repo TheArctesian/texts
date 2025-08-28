@@ -1,0 +1,229 @@
+/* Nord Color Scheme */
+:root {
+    --nord0: #2e3440;   /* Polar Night */
+    --nord1: #3b4252;
+    --nord2: #434c5e;
+    --nord3: #4c566a;
+    --nord4: #d8dee9;   /* Snow Storm */
+    --nord5: #e5e9f0;
+    --nord6: #eceff4;
+    --nord7: #8fbcbb;   /* Frost */
+    --nord8: #88c0d0;
+    --nord9: #81a1c1;
+    --nord10: #5e81ac;
+    --nord11: #bf616a;  /* Aurora */
+    --nord12: #d08770;
+    --nord13: #ebcb8b;
+    --nord14: #a3be8c;
+    --nord15: #b48ead;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+    line-height: 1.4;
+    background-color: var(--nord0);
+    color: var(--nord4);
+    min-height: 100vh;
+}
+
+header {
+    background: var(--nord1);
+    border-bottom: 2px solid var(--nord3);
+    padding: 0.75rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+nav {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    gap: 1.5rem;
+}
+
+nav a {
+    color: var(--nord4);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+nav a:hover {
+    background: var(--nord2);
+    color: var(--nord8);
+    border-color: var(--nord3);
+}
+
+nav a:focus {
+    outline: 2px solid var(--nord9);
+    outline-offset: 2px;
+}
+
+main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+h1, h2, h3 {
+    color: var(--nord6);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-size: 2.5rem;
+    border-left: 4px solid var(--nord8);
+    padding-left: 1rem;
+    margin-bottom: 2rem;
+}
+
+h2 {
+    font-size: 1.8rem;
+    color: var(--nord8);
+}
+
+h3 {
+    font-size: 1.4rem;
+    color: var(--nord9);
+}
+
+p {
+    margin-bottom: 1rem;
+    color: var(--nord4);
+}
+
+ul {
+    list-style: none;
+    margin-left: 1rem;
+}
+
+li {
+    margin-bottom: 0.5rem;
+    position: relative;
+}
+
+li::before {
+    content: "▶";
+    color: var(--nord8);
+    position: absolute;
+    left: -1rem;
+}
+
+a {
+    color: var(--nord8);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--nord7);
+    text-decoration: underline;
+}
+
+#timeline, #map {
+    background: var(--nord1);
+    border: 1px solid var(--nord3);
+    border-radius: 8px;
+    margin: 2rem 0;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Timeline specific styles */
+.bar {
+    transition: all 0.2s ease;
+}
+
+.bar:hover {
+    fill: var(--nord7) !important;
+    stroke: var(--nord8);
+    stroke-width: 2;
+}
+
+/* Map styles */
+.leaflet-container {
+    background: var(--nord1) !important;
+    border-radius: 6px;
+}
+
+.leaflet-popup-content-wrapper {
+    background: var(--nord2);
+    color: var(--nord4);
+    border-radius: 6px;
+}
+
+.leaflet-popup-tip {
+    background: var(--nord2);
+}
+
+/* Footer */
+footer {
+    margin-top: 4rem;
+    padding: 2rem 0;
+    border-top: 1px solid var(--nord3);
+    text-align: center;
+    color: var(--nord3);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--nord1);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--nord3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--nord8);
+}
+
+/* Selection */
+::selection {
+    background: var(--nord9);
+    color: var(--nord0);
+}
+
+/* Books page styles */
+.books-header {
+    margin-bottom: 2rem;
+}
+
+.search-controls {
+    display: flex;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.search-controls input:focus,
+.search-controls select:focus {
+    outline: 2px solid var(--nord9);
+    outline-offset: 2px;
+    border-color: var(--nord8);
+}
+
+.search-controls input::placeholder {
+    color: var(--nord3);
+}
+
+.search-controls select option {
+    background: var(--nord1);
+    color: var(--nord4);
+}

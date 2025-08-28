@@ -1,0 +1,11 @@
+# docker-compose.yml
+version: '3'
+
+services:
+  webdav:
+    build: .
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./IMGS:/app/IMGS
+    restart: unless-stopped

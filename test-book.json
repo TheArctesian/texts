@@ -1,0 +1,9 @@
+{
+  "id": "test-book-1",
+  "title": "Unknown Title",
+  "author": "Unknown Author",
+  "description": "Test book from image processing",
+  "image_path": "/home/okita/Scripts/Personal/texts/Data/IMGS/iPhone/Recents/IMG_6080.JPG",
+  "data_source": "manual",
+  "processed_at": "2025-01-01T12:00:00Z"
+}

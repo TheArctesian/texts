@@ -1,0 +1,113 @@
+.PHONY: help build run test clean install-ollama setup-gemma process-single process-all docker-build docker-run
+
+BINARY_NAME=book-vision
+OLLAMA_URL?=http://localhost:11434
+OLLAMA_MODEL?=gemma2:27b
+IMAGE_DIR?=./Data/IMGS/iPhone/Recents/
+OUTPUT_FILE?=./Data/books-vision.json
+
+help: ## Show this help message
+	@echo "Book Vision Processor - AI-powered book cover analyzer"
+	@echo ""
+	@echo "Available commands:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+
+build: ## Build the vision processor binary
+	go build -o $(BINARY_NAME) ./cmd/vision-main.go
+
+run: build ## Run the vision processor with default settings
+	./$(BINARY_NAME) -images $(IMAGE_DIR) -output $(OUTPUT_FILE)
+
+install-ollama: ## Install Ollama (if not already installed)
+	@echo "Installing Ollama..."
+	curl -fsSL https://ollama.com/install.sh | sh
+	@echo "Ollama installed successfully"
+
+setup-gemma: ## Pull the Gemma 27B model for Ollama
+	@echo "Pulling Gemma 27B model (this may take a while)..."
+	ollama pull gemma2:27b
+	@echo "Gemma model ready"
+
+setup-llava: ## Pull the LLaVA model as an alternative
+	@echo "Pulling LLaVA model for better vision capabilities..."
+	ollama pull llava:34b
+	@echo "LLaVA model ready"
+
+check-ollama: ## Check if Ollama is running
+	@curl -s $(OLLAMA_URL)/api/tags > /dev/null 2>&1 && echo "✓ Ollama is running at $(OLLAMA_URL)" || echo "✗ Ollama is not running. Start it with: ollama serve"
+
+process-single: build ## Process a single image file
+	@read -p "Enter image path: " IMAGE_PATH; \
+	./$(BINARY_NAME) -file $$IMAGE_PATH
+
+process-all: build check-ollama ## Process all images in the directory
+	./$(BINARY_NAME) -images $(IMAGE_DIR) -output $(OUTPUT_FILE) -ollama-url $(OLLAMA_URL) -model $(OLLAMA_MODEL)
+
+process-with-llava: build ## Process using LLaVA model for better accuracy
+	./$(BINARY_NAME) -images $(IMAGE_DIR) -output $(OUTPUT_FILE) -model llava:34b
+
+dev: ## Run in development mode with live reload
+	@echo "Starting Ollama if not running..."
+	@pgrep ollama > /dev/null || (ollama serve &)
+	@sleep 2
+	go run ./cmd/vision-main.go -images $(IMAGE_DIR) -output $(OUTPUT_FILE)
+
+test: ## Test with a sample image
+	@echo "Testing with first image in directory..."
+	@FIRST_IMAGE=$$(ls $(IMAGE_DIR)*.JPG 2>/dev/null | head -1); \
+	if [ -z "$$FIRST_IMAGE" ]; then \
+		echo "No JPG files found in $(IMAGE_DIR)"; \
+		exit 1; \
+	fi; \
+	./$(BINARY_NAME) -file $$FIRST_IMAGE
+
+benchmark: build ## Compare OCR vs Vision processing
+	@echo "Benchmarking OCR vs Vision processing..."
+	@echo "Processing with Vision (Gemma)..."
+	time ./$(BINARY_NAME) -images $(IMAGE_DIR) -output ./Data/books-vision.json
+	@echo ""
+	@echo "Processing with OCR (Tesseract)..."
+	time ./book-processor -process -images $(IMAGE_DIR) -output ./Data/books-ocr.json
+
+docker-build: ## Build Docker image with Ollama support
+	docker build -f Dockerfile.vision -t book-vision .
+
+docker-run: ## Run the processor in Docker
+	docker run --rm \
+		-v $(PWD)/Data:/app/Data \
+		--network host \
+		book-vision
+
+clean: ## Clean build artifacts
+	rm -f $(BINARY_NAME)
+	rm -f book-vision
+	rm -f Data/books-vision.json
+
+install-deps: ## Install Go dependencies
+	go mod download
+	go mod tidy
+
+stats: ## Show processing statistics
+	@if [ -f $(OUTPUT_FILE) ]; then \
+		echo "Books processed: $$(cat $(OUTPUT_FILE) | jq length)"; \
+		echo "Data sources breakdown:"; \
+		cat $(OUTPUT_FILE) | jq -r '.[].data_source' | sort | uniq -c; \
+	else \
+		echo "No output file found. Run 'make process-all' first."; \
+	fi
+
+compare-results: ## Compare vision results with OCR results
+	@echo "Comparing Vision vs OCR results..."
+	@if [ -f ./Data/books-vision.json ] && [ -f ./Data/books.json ]; then \
+		echo "Vision-processed books: $$(cat ./Data/books-vision.json | jq length)"; \
+		echo "OCR-processed books: $$(cat ./Data/books.json | jq length)"; \
+		echo ""; \
+		echo "Sample comparison (first 3 books):"; \
+		echo "VISION:"; \
+		cat ./Data/books-vision.json | jq -r '.[:3] | .[] | "- \(.title) by \(.author)"'; \
+		echo ""; \
+		echo "OCR:"; \
+		cat ./Data/books.json | jq -r '.[:3] | .[] | "- \(.title) by \(.author)"'; \
+	else \
+		echo "Missing comparison files. Run both processors first."; \
+	fi

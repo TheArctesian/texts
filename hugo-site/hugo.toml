@@ -1,0 +1,9 @@
+baseURL = "/"
+title = "Library"
+languageCode = "en-us"
+
+[params]
+  description = "Digital book collection"
+
+[markup.goldmark.renderer]
+  unsafe = true

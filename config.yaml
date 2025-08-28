@@ -1,0 +1,21 @@
+image_dir: "./Data/IMGS/iPhone/Recents/"
+output_file: "./Data/books.json"
+hugo_dir: "./hugo-site/"
+
+google_books_api:
+  enabled: true
+  api_key: ""  # Set via GOOGLE_BOOKS_API_KEY environment variable
+  base_url: "https://www.googleapis.com/books/v1"
+
+openlibrary_api:
+  enabled: true
+  api_key: ""
+  base_url: "https://openlibrary.org"
+
+tesseract:
+  language: "eng"
+  page_segmentation_mode: 6  # Uniform block of text
+
+ollama:
+  url: "http://localhost:11434"  # Ollama server URL
+  model: "gemma3:27b"  # Vision model to use
